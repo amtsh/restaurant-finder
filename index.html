@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Google Maps</title>
+    <style media="screen">
+      html,
+      body {
+        font-family: Arial, sans-serif;
+        height: 100%;
+        margin: 0;
+        padding: 0
+      }
+      #map {
+        bottom: 0px;
+        height: 100%;
+        left: 362px;
+        position: absolute;
+        right: 0px;
+      }
+      .side-panel {
+        background: #fff;
+        border: 0px solid #999;
+        border-radius: 3px;
+        height: 100%;
+        line-height: 35px;
+        padding: 10px 10px 30px 10px;
+        text-align: left;
+        width: 340px;
+      }
+    </style>
+  </head>
+  <body>
+
+    <div class="container">
+      <div class="side-panel">
+        <h2>Find the best restaurants in your neighbourhood.</h2>
+      </div>
+      <div id="map"></div>
+    </div>
+    <script type="text/javascript" async defer src="js/model.js"></script>
+    <script type="text/javascript" async defer src="js/controller.js"></script>
+    <script type="text/javascript" async defer>
+
+      function initMap() {
+        // set default location in case user doesnt allow to detect their location
+        var Tokyo = { lat: 35.689487, lng: 139.691706 };
+        setUserLocation(Tokyo);
+
+        var options = {
+          element: document.getElementById('map'),
+          location: userManager.getLocation()
+        }
+        mapManager.init(options)
+        detectUserLocation(locationDetected);
+        placeServiceMgr.init(mapManager.getMap())
+      }
+
+      function locationDetected(coordinates) {
+        setUserLocation(coordinates);
+        mapManager.setCenter(coordinates);
+        showNearbyRestaurants();
+      }
+
+    </script>
+    <script async defer
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDGIafaO6hWMQTt5F2ircJBTUpxL1A-HL4&v=3&libraries=places&callback=initMap">
+    </script>
+  </body>
+</html>
