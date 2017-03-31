@@ -35,36 +35,42 @@
     <div class="container">
       <div class="side-panel">
         <h2>Find the best restaurants in your neighbourhood.</h2>
+        <div>
+          <input id="start_drawing" type="button" value="Show Drawing Tools">
+          <input id="stop_drawing" type="button" value="Hide Drawing Tools">
+        </div>
       </div>
       <div id="map"></div>
     </div>
-    <script type="text/javascript" async defer src="js/model.js"></script>
-    <script type="text/javascript" async defer src="js/controller.js"></script>
-    <script type="text/javascript" async defer>
+    <script type="text/javascript" src="js/model.js"></script>
+    <script type="text/javascript" src="js/controller.js"></script>
+    <script type="text/javascript" defer>
 
       function initMap() {
         // set default location in case user doesnt allow to detect their location
         var Tokyo = { lat: 35.689487, lng: 139.691706 };
-        setUserLocation(Tokyo);
+        userManager.setLocation(Tokyo);
 
         var options = {
           element: document.getElementById('map'),
           location: userManager.getLocation()
         }
         mapManager.init(options)
-        detectUserLocation(locationDetected);
-        placeServiceMgr.init(mapManager.getMap())
+
+        userManager.detectUserLocation(locationDetected);
+        initializeServices();
+
+        document.getElementById('start_drawing').addEventListener('click', startDrawing);
+        document.getElementById('stop_drawing').addEventListener('click', stopDrawing);
       }
 
       function locationDetected(coordinates) {
-        setUserLocation(coordinates);
-        mapManager.setCenter(coordinates);
-        showNearbyRestaurants();
+        restaurantManager.showPlacesNearLocation(mapManager.getCenter());
       }
 
     </script>
     <script async defer
-      src="https://maps.googleapis.com/maps/api/js?key=API_KEY_HERE&v=3&libraries=places&callback=initMap">
+      src="https://maps.googleapis.com/maps/api/js?key=API_KEY_HERE&v=3&libraries=places,drawing&callback=initMap">
     </script>
   </body>
 </html>

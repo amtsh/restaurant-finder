@@ -10,6 +10,25 @@ var restaurantManager = (function() {
     },
     deleteRestaurant: function(restaurantId) {
       restaurants = restaurants.filter(function(r) { return r.restaurantId !== restaurantId })
+    },
+    showPlacesNearLocation: function(location) {
+      placeServiceMgr.search(location, 'location', this.placeResultsHandler);
+    },
+    showPlacesInArea: function(bounds) {
+      placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
+    },
+    placeResultsHandler: function(results, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+          placeServiceMgr.getPlace(results[i].place_id, restaurantManager.placeDetailsResultHandler);
+        }
+      }
+    },
+    placeDetailsResultHandler: function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        restaurantManager.addRestaurant(place);
+        mapManager.addMarker(place.geometry.location, place.name);
+      }
     }
   }
 })();
@@ -23,6 +42,22 @@ var userManager = (function() {
     },
     setLocation: function(location) {
       currentLocation = location
+    },
+    detectUserLocation: function(success_cb) {
+      if (!navigator.geolocation) this.handleLocationError(false);
+
+      var that = this;
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          currentLocation = { lat: position.coords.latitude, lng: position.coords.longitude }
+          success_cb(currentLocation);
+        },
+        function() { that.handleLocationError(true); }
+      );
+    },
+    handleLocationError: function(browserHasGeolocation) {
+      console.log("Couldnt detect location");
+      restaurantManager.showPlacesNearLocation(mapManager.getCenter());
     }
   }
 })();
@@ -31,6 +66,7 @@ var mapManager = (function() {
   var map;
   var bounds;
   var infowindow;
+  var markers = [];
 
   return {
     init: function(options) {
@@ -54,6 +90,32 @@ var mapManager = (function() {
     },
     getCenter: function(location) {
       return map.getCenter();
+    },
+    addMarker: function(location, infoContent) {
+      var marker = new google.maps.Marker({
+        map: map,
+        position: location
+      });
+      bounds.extend(marker.position);
+      map.fitBounds(mapManager.getBounds());
+
+      this.addInfoWindow(marker, infoContent);
+      markers.push(marker);
+    },
+    addInfoWindow(marker, content) {
+      google.maps.event.addListener(marker, 'click', function() {
+        infowindow.setContent(content);
+        infowindow.open(map, this);
+      });
+    },
+    showMarkers: function(map) {
+      for (var i = 0; i < markers.length; i++) {
+        markers[i].setMap(map);
+      }
+    },
+    removeAllMarkers: function() {
+      this.showMarkers(null);
+      markers = []
     }
   }
 })();
@@ -65,16 +127,61 @@ var placeServiceMgr = (function() {
     init: function(map) {
       service = new google.maps.places.PlacesService(map);
     },
-    search: function(location, success_cb) {
-      var request = {
-        location: location,
-        radius: '600',
-        types: ['restaurant']
-      };
+    search: function(location, searchBy, success_cb) {
+      var request = { types: ['restaurant'] };
+
+      if (searchBy == 'bounds') {
+          request.bounds = location
+      }
+      if (searchBy == 'location') {
+          request.location = location
+          request.radius = '600'
+      }
       service.nearbySearch(request, success_cb);
     },
     getPlace: function(placeID, success_cb) {
       service.getDetails({placeId: placeID}, success_cb);
+    }
+  }
+})();
+
+var drawingManager = (function() {
+  var drawService;
+  var rectangle = null;
+
+  return {
+    init: function(onRectangleComplete) {
+      drawService = new google.maps.drawing.DrawingManager({
+        drawingMode: google.maps.drawing.OverlayType.MARKER,
+        drawingControl: true,
+        drawingControlOptions: {
+          position: google.maps.ControlPosition.TOP_CENTER,
+          drawingModes: ['rectangle']
+        },
+      });
+      drawService.addListener('overlaycomplete', this.onRectangleComplete);
+      return this;
+    },
+    enableDrawing: function(map) {
+      drawService.setMap(map);
+    },
+    disableDrawing: function() {
+      if (drawService.map) {
+          if (rectangle) {rectangle.setMap(null);}
+          drawService.setMap(null);
+      }
+    },
+    onRectangleComplete: function(event) {
+      // on rectangular draw
+      if (event) {
+        if (rectangle) rectangle.setMap(null);
+        rectangle = event.overlay;
+        rectangle.setEditable(true);
+        rectangle.addListener('bounds_changed', drawingManager.onRectangleComplete);
+      }
+      mapManager.removeAllMarkers(null);
+      drawService.setDrawingMode(null);
+      restaurantManager.showPlacesInArea(rectangle.getBounds());
     }
   }
 })();
