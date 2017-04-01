@@ -20,12 +20,12 @@ function locationDetected(coordinates) {
   userManager.setLocation(coordinates);
   mapManager.setCenter(coordinates);
   mapManager.addMarker(coordinates, 'Your Location', true);
-  restaurantManager.showPlacesNearLocation(mapManager.getCenter());
+  mapManager.showPlacesNearLocation(mapManager.getCenter());
 }
 
 function handleLocationError() {
   console.log("Couldnt detect location");
-  restaurantManager.showPlacesNearLocation(mapManager.getCenter());
+  mapManager.showPlacesNearLocation(mapManager.getCenter());
   mapManager.addMarker(mapManager.getCenter(), 'Default Location', true);
 }
 

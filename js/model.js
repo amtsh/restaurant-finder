@@ -10,31 +10,6 @@ var restaurantManager = (function() {
     },
     deleteRestaurant: function(restaurantId) {
       restaurants = restaurants.filter(function(r) { return r.restaurantId !== restaurantId })
-    },
-    showPlacesNearLocation: function(location) {
-      placeServiceMgr.search(location, 'location', this.placeResultsHandler);
-    },
-    showPlacesInArea: function(bounds) {
-      placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
-    },
-    placeResultsHandler: function(results, status) {
-      if (status == google.maps.places.PlacesServiceStatus.OK) {
-        for (var i = 0; i < results.length; i++) {
-          placeServiceMgr.getPlace(results[i].place_id, restaurantManager.placeDetailsResultHandler);
-        }
-      }
-      if (status === 'UNKNOWN_ERROR') {
-        document.dispatchEvent(new Event('offline'));
-      }
-    },
-    placeDetailsResultHandler: function(place, status) {
-      if (status === google.maps.places.PlacesServiceStatus.OK) {
-        restaurantManager.addRestaurant(place);
-        mapManager.addMarker(place.geometry.location, mapManager.getInfoContent(place));
-      }
-      if (status === 'UNKNOWN_ERROR') {
-        document.dispatchEvent(new Event('offline'));
-      }
     }
   }
 })();
@@ -139,6 +114,31 @@ var mapManager = (function() {
           '<a target="_blank" href="'+ mapsDirUrl +'">Get Directions</a> <br>' +
         '</p>'
       '</div>';
+    },
+    showPlacesNearLocation: function(location) {
+      placeServiceMgr.search(location, 'location', this.placeResultsHandler);
+    },
+    showPlacesInArea: function(bounds) {
+      placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
+    },
+    placeResultsHandler: function(results, status) {
+      if (status == google.maps.places.PlacesServiceStatus.OK) {
+        for (var i = 0; i < results.length; i++) {
+          placeServiceMgr.getPlace(results[i].place_id, mapManager.placeDetailsResultHandler);
+        }
+      }
+      if (status === 'UNKNOWN_ERROR') {
+        document.dispatchEvent(new Event('offline'));
+      }
+    },
+    placeDetailsResultHandler: function(place, status) {
+      if (status === google.maps.places.PlacesServiceStatus.OK) {
+        restaurantManager.addRestaurant(place);
+        mapManager.addMarker(place.geometry.location, mapManager.getInfoContent(place));
+      }
+      if (status === 'UNKNOWN_ERROR') {
+        document.dispatchEvent(new Event('offline'));
+      }
     }
   }
 })();
@@ -204,7 +204,7 @@ var drawingManager = (function() {
       }
       mapManager.removeAllMarkers(null);
       drawService.setDrawingMode(null);
-      restaurantManager.showPlacesInArea(rectangle.getBounds());
+      mapManager.showPlacesInArea(rectangle.getBounds());
     }
   }
 })();
