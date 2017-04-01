@@ -23,11 +23,17 @@ var restaurantManager = (function() {
           placeServiceMgr.getPlace(results[i].place_id, restaurantManager.placeDetailsResultHandler);
         }
       }
+      if (status === 'UNKNOWN_ERROR') {
+        document.dispatchEvent(new Event('offline'));
+      }
     },
     placeDetailsResultHandler: function(place, status) {
       if (status === google.maps.places.PlacesServiceStatus.OK) {
         restaurantManager.addRestaurant(place);
-        mapManager.addMarker(place.geometry.location, place.name);
+        mapManager.addMarker(place.geometry.location, mapManager.getInfoContent(place));
+      }
+      if (status === 'UNKNOWN_ERROR') {
+        document.dispatchEvent(new Event('offline'));
       }
     }
   }
@@ -116,6 +122,20 @@ var mapManager = (function() {
     removeAllMarkers: function() {
       this.showMarkers(null);
       markers = []
+    },
+    getInfoContent: function(place) {
+      var origin = userManager.getLocation().lat + ',' + userManager.getLocation().lng;
+      var destination = place.formatted_address + ' ' + place.name
+      var mapsDirUrl = 'https://www.google.co.jp/maps/dir/' +
+        origin + '/' + destination;
+
+      return '<div class="content" style="min-width:22em;">' +
+      '<h5>' + place.name + '</h5>' +
+        '<p>' +
+          '<a target="_blank" href="'+ place.url +'">View Place</a> <br>' +
+          '<a target="_blank" href="'+ mapsDirUrl +'">Get Directions</a> <br>' +
+        '</p>'
+      '</div>';
     }
   }
 })();
