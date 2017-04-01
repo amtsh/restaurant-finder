@@ -49,8 +49,8 @@ var userManager = (function() {
     setLocation: function(location) {
       currentLocation = location
     },
-    detectUserLocation: function(success_cb) {
-      if (!navigator.geolocation) this.handleLocationError(false);
+    detectUserLocation: function(success_cb, failed_cb) {
+      if (!navigator.geolocation) failed_cb();
 
       var that = this;
       navigator.geolocation.getCurrentPosition(
@@ -58,12 +58,8 @@ var userManager = (function() {
           currentLocation = { lat: position.coords.latitude, lng: position.coords.longitude }
           success_cb(currentLocation);
         },
-        function() { that.handleLocationError(true); }
+        failed_cb
       );
-    },
-    handleLocationError: function(browserHasGeolocation) {
-      console.log("Couldnt detect location");
-      restaurantManager.showPlacesNearLocation(mapManager.getCenter());
     }
   }
 })();
@@ -97,16 +93,23 @@ var mapManager = (function() {
     getCenter: function(location) {
       return map.getCenter();
     },
-    addMarker: function(location, infoContent) {
-      var marker = new google.maps.Marker({
+    addMarker: function(location, infoContent, isCurrentLocation) {
+      var marker_options = {
         map: map,
         position: location
-      });
+      }
+      if (isCurrentLocation) {
+        marker_options.icon = {
+          path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+          scale: 5,
+          strokeColor: "#33C3F0"
+        }
+      }
+      var marker = new google.maps.Marker(marker_options);
       bounds.extend(marker.position);
       map.fitBounds(mapManager.getBounds());
-
       this.addInfoWindow(marker, infoContent);
-      markers.push(marker);
+      if (!isCurrentLocation) markers.push(marker);
     },
     addInfoWindow(marker, content) {
       google.maps.event.addListener(marker, 'click', function() {

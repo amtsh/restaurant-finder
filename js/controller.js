@@ -1,6 +1,6 @@
 function initMap() {
   // set default location in case user doesnt allow to detect their location
-  var Tokyo = { lat: 35.689487, lng: 139.691706 };
+  var Tokyo = { lat: 35.681333, lng: 139.766290 };
   userManager.setLocation(Tokyo);
 
   var options = {
@@ -9,7 +9,7 @@ function initMap() {
   }
   mapManager.init(options)
 
-  userManager.detectUserLocation(locationDetected);
+  userManager.detectUserLocation(locationDetected, handleLocationError);
   initializeServices();
 
   document.getElementById('start_drawing').addEventListener('click', startDrawing);
@@ -19,7 +19,14 @@ function initMap() {
 function locationDetected(coordinates) {
   userManager.setLocation(coordinates);
   mapManager.setCenter(coordinates);
+  mapManager.addMarker(coordinates, 'Your Location', true);
   restaurantManager.showPlacesNearLocation(mapManager.getCenter());
+}
+
+function handleLocationError() {
+  console.log("Couldnt detect location");
+  restaurantManager.showPlacesNearLocation(mapManager.getCenter());
+  mapManager.addMarker(mapManager.getCenter(), 'Default Location', true);
 }
 
 function initializeServices() {
