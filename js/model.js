@@ -129,6 +129,8 @@ var mapManager = (function() {
       placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
     },
     placeResultsHandler: function(results, status) {
+      if (!results.length) { notificationManager.showNotification('No results found.', 3000) }
+
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         for (var i = 0; i < results.length; i++) {
           placeServiceMgr.getPlace(results[i].place_id, mapManager.placeDetailsResultHandler);
