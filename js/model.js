@@ -1,15 +1,19 @@
 var restaurantManager = (function() {
   var restaurants = [];
+  var visitStore = {};
 
   return {
     addRestaurant: function(restaurant) {
       restaurants.push(restaurant);
     },
-    getCount: function() {
-      return restaurants.length;
+    getVisitCount: function(placeID) {
+      return visitStore[placeID];
     },
     deleteRestaurant: function(restaurantId) {
       restaurants = restaurants.filter(function(r) { return r.restaurantId !== restaurantId })
+    },
+    setVisitStore: function(data) {
+      visitStore = data;
     }
   }
 })();
@@ -106,12 +110,14 @@ var mapManager = (function() {
       var destination = place.formatted_address + ' ' + place.name
       var mapsDirUrl = 'https://www.google.co.jp/maps/dir/' +
         origin + '/' + destination;
+      var visits = restaurantManager.getVisitCount(place.place_id);
 
       return '<div class="content" style="min-width:22em;">' +
-      '<h5>' + place.name + '</h5>' +
+      '<h5>' + place.name + '</h5> <br>' +
+       '<b>Place visits: </b>' + (visits || '-') +
         '<p>' +
           '<a target="_blank" href="'+ place.url +'">View Place</a> <br>' +
-          '<a target="_blank" href="'+ mapsDirUrl +'">Get Directions</a> <br>' +
+          '<p><a onclick="placeVisited(' + "\'" + place.place_id + "\'" + ')" target="_blank" href="'+ mapsDirUrl +'">Get Directions</a></p>' +
         '</p>'
       '</div>';
     },
@@ -205,6 +211,42 @@ var drawingManager = (function() {
       mapManager.removeAllMarkers(null);
       drawService.setDrawingMode(null);
       mapManager.showPlacesInArea(rectangle.getBounds());
+    }
+  }
+})();
+
+var firebaseManager = (function() {
+  var database;
+  var firebase;
+  var config = {
+    apiKey: "AIzaSyCgc5Es2L9OXGkUUs0isgMR9llyC3i3dJE",
+    authDomain: "restaurant-finder-fffe2.firebaseapp.com",
+    databaseURL: "https://restaurant-finder-fffe2.firebaseio.com",
+    projectId: "restaurant-finder-fffe2",
+    storageBucket: "restaurant-finder-fffe2.appspot.com",
+    messagingSenderId: "372801752957"
+  };
+
+  return {
+    init: function(f) {
+      firebase = f
+      firebase.initializeApp(config);
+      database = firebase.database();
+
+      this.getAll(function(data) {
+        restaurantManager.setVisitStore(data);
+      });
+    },
+    getAll: function(success_cb) {
+      firebase.database().ref('/visited').once('value').then(function(snapshot) {
+        success_cb(snapshot.val());
+      });
+    },
+    increment: function(key){
+      var databaseRef = firebase.database().ref('/visited').child(key);
+        databaseRef.transaction(function(val) {
+          return (val || 0) + 1;
+        });
     }
   }
 })();

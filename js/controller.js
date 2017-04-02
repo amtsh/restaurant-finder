@@ -8,10 +8,9 @@ function initMap() {
     location: userManager.getLocation()
   }
   mapManager.init(options)
-
-  userManager.detectUserLocation(locationDetected, handleLocationError);
   initializeServices();
 
+  userManager.detectUserLocation(locationDetected, handleLocationError);
   document.getElementById('start_drawing').addEventListener('click', startDrawing);
   document.getElementById('stop_drawing').addEventListener('click', stopDrawing);
 }
@@ -25,8 +24,8 @@ function locationDetected(coordinates) {
 
 function handleLocationError() {
   console.log("Couldnt detect location");
-  mapManager.showPlacesNearLocation(mapManager.getCenter());
   mapManager.addMarker(mapManager.getCenter(), 'Default Location', true);
+  mapManager.showPlacesNearLocation(mapManager.getCenter());
 }
 
 function initializeServices() {
@@ -46,4 +45,12 @@ document.addEventListener('offline', handleOffline);
 
 function handleOffline() {
   alert("offline");
+}
+
+function placeVisited(placeID) {
+  firebaseManager.increment(placeID);
+}
+
+function firebase_init() {
+  firebaseManager.init(firebase);
 }
