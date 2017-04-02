@@ -14,6 +14,9 @@ var restaurantManager = (function() {
     },
     setVisitStore: function(data) {
       visitStore = data;
+    },
+    showNearby: function() {
+      mapManager.showPlacesNearLocation(userManager.getLocation());
     }
   }
 })();
@@ -129,7 +132,9 @@ var mapManager = (function() {
       placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
     },
     placeResultsHandler: function(results, status) {
-      if (!results.length) { notificationManager.showNotification('No results found.', 3000) }
+      if (!results.length) {
+        notificationManager.showNotification('No results found in that area. Please select again.', 3000)
+      }
 
       if (status == google.maps.places.PlacesServiceStatus.OK) {
         for (var i = 0; i < results.length; i++) {

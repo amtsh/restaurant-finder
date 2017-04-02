@@ -20,23 +20,20 @@ function locationDetected(coordinates) {
   userManager.setLocation(coordinates);
   mapManager.setCenter(coordinates);
   mapManager.addMarker(coordinates, 'Your Location', true);
-  nearby();
+  restaurantManager.showNearby()
 }
 
 function handleLocationError() {
   notificationManager.showNotification("Couldnt detect location", 3000);
   mapManager.addMarker(mapManager.getCenter(), 'Default Location', true);
-  nearby()
+  userManager.setLocation(mapManager.getCenter())
+  restaurantManager.showNearby()
 }
 
 function initializeServices() {
   notificationManager.init('notification');
   placeServiceMgr.init(mapManager.getMap());
   drawingManager.init();
-}
-
-function nearby() {
-  mapManager.showPlacesNearLocation(mapManager.getCenter());
 }
 
 function startDrawing() {
