@@ -113,11 +113,12 @@ var mapManager = (function() {
       var visits = restaurantManager.getVisitCount(place.place_id);
 
       return '<div class="content" style="min-width:22em;">' +
-      '<h5>' + place.name + '</h5> <br>' +
-       '<b>Place visits: </b>' + (visits || '-') +
-        '<p>' +
-          '<a target="_blank" href="'+ place.url +'">View Place</a> <br>' +
-          '<p><a onclick="placeVisited(' + "\'" + place.place_id + "\'" + ')" target="_blank" href="'+ mapsDirUrl +'">Get Directions</a></p>' +
+      '<h5>' + place.name + '</h5>' +
+      '<b>Ratings: </b>' + (place.rating || '-') + '<br>' +
+       '<b>Place visits: </b>' + (visits || '-') + '<br>' +
+        '<br><p>' +
+          '<a target="_blank" href="'+ place.url +'">View Restaurant Details</a> <br>' +
+          '<a onclick="placeVisited(' + "\'" + place.place_id + "\'" + ')" target="_blank" href="'+ mapsDirUrl +'">Get Directions</a>' +
         '</p>'
       '</div>';
     },
