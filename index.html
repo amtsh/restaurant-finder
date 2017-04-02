@@ -5,32 +5,7 @@
     <title>Find Restuarants</title>
     <link rel="stylesheet" href="/css/normalize.css">
     <link rel="stylesheet" href="/css/skeleton.css">
-    <style media="screen">
-      html,
-      body {
-        font-family: Arial, sans-serif;
-        height: 100%;
-        margin: 0;
-        padding: 0
-      }
-      #map {
-        bottom: 0px;
-        height: 100%;
-        left: 362px;
-        position: absolute;
-        right: 0px;
-      }
-      .side-panel {
-        background: #fff;
-        border: 0px solid #999;
-        border-radius: 3px;
-        height: 100%;
-        line-height: 35px;
-        padding: 20px 10px 30px 20px;
-        text-align: left;
-        width: 340px;
-      }
-    </style>
+    <link rel="stylesheet" href="/css/index.css">
   </head>
   <body>
     <div class="">
@@ -45,6 +20,8 @@
         </div>
       </div>
       <div id="map"></div>
+    </div>
+    <div id="notification" class="notification-box">Loading...</div>
     </div>
     <script type="text/javascript" src="js/model.js"></script>
     <script type="text/javascript" src="js/controller.js"></script>

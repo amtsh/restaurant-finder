@@ -250,3 +250,29 @@ var firebaseManager = (function() {
     }
   }
 })();
+
+var notificationManager = (function() {
+  var el;
+
+  return {
+    init: function(element) {
+      el = element;
+      this.hideNotification();
+    },
+    showNotification: function(text, timeout) {
+      if (text) { this.setNotificationText(text) }
+      document.getElementById(el).style.visibility = "visible";
+      if (timeout) { this.hideAfter(timeout); }
+    },
+    hideNotification: function() {
+      document.getElementById(el).style.visibility = "hidden";
+    },
+    setNotificationText: function(text) {
+      document.getElementById(el).textContent = text;
+    },
+    hideAfter: function(t) {
+      var that = this;
+      setTimeout(function () { that.hideNotification() }, t);
+    }
+  }
+})();

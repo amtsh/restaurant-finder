@@ -16,6 +16,7 @@ function initMap() {
 }
 
 function locationDetected(coordinates) {
+  notificationManager.showNotification("Location detected.", 3000);
   userManager.setLocation(coordinates);
   mapManager.setCenter(coordinates);
   mapManager.addMarker(coordinates, 'Your Location', true);
@@ -23,12 +24,13 @@ function locationDetected(coordinates) {
 }
 
 function handleLocationError() {
-  console.log("Couldnt detect location");
+  notificationManager.showNotification("Couldnt detect location", 3000);
   mapManager.addMarker(mapManager.getCenter(), 'Default Location', true);
   mapManager.showPlacesNearLocation(mapManager.getCenter());
 }
 
 function initializeServices() {
+  notificationManager.init('notification');
   placeServiceMgr.init(mapManager.getMap());
   drawingManager.init();
 }
@@ -44,7 +46,7 @@ function stopDrawing() {
 document.addEventListener('offline', handleOffline);
 
 function handleOffline() {
-  alert("offline");
+  notificationManager.showNotification("Offline", 3000);
 }
 
 function placeVisited(placeID) {
