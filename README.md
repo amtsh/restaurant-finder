@@ -2,8 +2,8 @@
 Find the best restaurants in your neighbourhood.
 
 1. [DONE] Plot restaurants across any place you like in Japan or India.
-2. [Not Done] Each restaurant will have at least 1 food specialty.
-3. [Not Done] A layer panel can filter the restaurant type to show.
+2. [DONE] Each restaurant will have at least 1 food specialty.
+3. [DONE] A layer panel can filter the restaurant type to show.
 4. [DONE] Each restaurant can keep track of the number of customers that visited.
 5. [DONE] Customers can get direction to the restaurant from current location.
 6. [DONE] Draw a circle or rectangle on the map and and show the number of restaurants within the circle or rectangle.
