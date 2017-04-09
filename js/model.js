@@ -15,8 +15,8 @@ var restaurantManager = (function() {
     setVisitStore: function(data) {
       visitStore = data;
     },
-    showNearby: function() {
-      mapManager.showPlacesNearLocation(userManager.getLocation());
+    showNearby: function(query) {
+      mapManager.showPlaces(userManager.getLocation(), 'location', query);
     }
   }
 })();
@@ -125,18 +125,21 @@ var mapManager = (function() {
         '</p>'
       '</div>';
     },
-    showPlacesNearLocation: function(location) {
-      placeServiceMgr.search(location, 'location', this.placeResultsHandler);
-    },
-    showPlacesInArea: function(bounds) {
-      placeServiceMgr.search(bounds, 'bounds', this.placeResultsHandler);
+    showPlaces: function(location, searchBy, query) {
+      var options = {
+        searchBy: searchBy,
+        location: location,
+        query: query
+      }
+      placeServiceMgr.search(options, this.placeResultsHandler);
     },
     placeResultsHandler: function(results, status) {
-      if (!results.length) {
+      if (results && !results.length) {
         notificationManager.showNotification('No results found in that area. Please select again.', 3000)
       }
 
       if (status == google.maps.places.PlacesServiceStatus.OK) {
+        mapManager.removeAllMarkers(null);
         for (var i = 0; i < results.length; i++) {
           placeServiceMgr.getPlace(results[i].place_id, mapManager.placeDetailsResultHandler);
         }
@@ -159,22 +162,32 @@ var mapManager = (function() {
 
 var placeServiceMgr = (function() {
   var service;
+  var radius = '600'
 
   return {
     init: function(map) {
       service = new google.maps.places.PlacesService(map);
     },
-    search: function(location, searchBy, success_cb) {
+    search: function(options, success_cb) {
       var request = { types: ['restaurant'] };
+      var searchBy = options.searchBy;
+      var location = options.location;
+      var query = options.query || null;
 
       if (searchBy == 'bounds') {
           request.bounds = location
       }
       if (searchBy == 'location') {
           request.location = location
-          request.radius = '600'
+          request.radius = radius
       }
-      service.nearbySearch(request, success_cb);
+      if (query) {
+        request.query = query;
+        service.textSearch(request, success_cb);
+      }
+      else {
+        service.nearbySearch(request, success_cb);
+      }
     },
     getPlace: function(placeID, success_cb) {
       service.getDetails({placeId: placeID}, success_cb);
@@ -218,7 +231,7 @@ var drawingManager = (function() {
       }
       mapManager.removeAllMarkers(null);
       drawService.setDrawingMode(null);
-      mapManager.showPlacesInArea(rectangle.getBounds());
+      mapManager.showPlaces(rectangle.getBounds(), 'bounds', cuisineFilterManager.getCuisine());
     }
   }
 })();
@@ -281,6 +294,56 @@ var notificationManager = (function() {
     hideAfter: function(t) {
       var that = this;
       setTimeout(function () { that.hideNotification() }, t);
+    }
+  }
+})();
+
+var cuisineFilterManager = (function() {
+  var ul;
+  var cuisine;
+  var isFilterOn;
+  var cuisines = ['African', 'Asian', 'Barbecue', 'Brazilian',
+    'Breakfast', 'Cafe', 'Chinese', 'Hawaii',
+    'Doughnut', 'European', 'Fast food', 'Hamburger',
+    'Ice cream', 'Indian', 'Indonesian', 'Irish', 'Italian', 'Jamaican',
+    'Japanese', 'Jewish', 'Korean', 'Malaysian', 'Mediterranean',
+    'Mexican', 'Moroccan', 'Peruvian', 'Philippine',
+    'Polish', 'Portuguese', 'Russian', 'Sausage', 'Seafood', 'Soul food',
+    'Spanish Cuisine', 'Sri Lankan', 'Steak', 'Street food', 'Sushi', 'Swiss',
+    'Tapas', 'Thai', 'Tunisian', 'Turkish', 'Vegetarian', 'Vietnamese']
+
+  return {
+    init: function(ul) {
+      this.ul = ul;
+      return this;
+    },
+    getCuisine: function() {
+      return this.cuisine;
+    },
+    addCuisines: function() {
+      for (var i = 0; i < cuisines.length; i++) {
+        var cuisineVal = cuisines[i].replace(/ /g,'').toLowerCase();
+
+        var li = document.createElement('li');
+        li.setAttribute("class", "cuisine");
+
+        var checkbox = document.createElement('input');
+        checkbox.type = "radio";
+        checkbox.name = "cuisine";
+        checkbox.value = cuisineVal;
+        checkbox.id = cuisineVal;
+
+        var label = document.createElement('label');
+        label.appendChild(checkbox);
+        label.appendChild(document.createTextNode(cuisines[i]));
+
+        li.appendChild(label);
+        this.ul.appendChild(li);
+      }
+    },
+    enableFilter: function(on_off, cuisine) {
+      this.isFilterOn = on_off;
+      this.cuisine = cuisine;
     }
   }
 })();

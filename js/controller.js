@@ -34,6 +34,7 @@ function initializeServices() {
   notificationManager.init('notification');
   placeServiceMgr.init(mapManager.getMap());
   drawingManager.init();
+  cuisineFilterManager.init(document.getElementById('cuisine_types')).addCuisines()
 }
 
 function startDrawing() {
@@ -43,8 +44,6 @@ function startDrawing() {
 function stopDrawing() {
   drawingManager.disableDrawing();
 }
-
-document.addEventListener('offline', handleOffline);
 
 function handleOffline() {
   notificationManager.showNotification("Offline", 3000);
@@ -57,3 +56,23 @@ function placeVisited(placeID) {
 function firebase_init() {
   firebaseManager.init(firebase);
 }
+
+function searchPlacesByCuisine(cuisine) {
+  restaurantManager.showNearby(cuisine);
+}
+
+/* Event Listeners */
+
+document.addEventListener('offline', handleOffline);
+
+document.addEventListener('click',function(e) {
+  if(e.target && e.target.name== 'cuisine') {
+    if(e.target.checked) {
+      searchPlacesByCuisine(e.target.id);
+      cuisineFilterManager.enableFilter(true, e.target.id);
+    }
+  }
+  if(e.target && e.target.id== 'clear_filter') {
+    cuisineFilterManager.enableFilter(false, null);
+  }
+});

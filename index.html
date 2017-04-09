@@ -8,10 +8,17 @@
     <link rel="stylesheet" href="/css/index.css">
   </head>
   <body>
-    <div class="">
+    <div>
       <div class="side-panel">
         <h3>Find restaurants in your neighbourhood.</h3>
-        <div>
+        <div class="container">
+          <form>
+            <b>Cuisine type</b>
+            <input id="clear_filter" type="reset" value="Clear" />
+            <ul id="cuisine_types"></ul>
+          </form>
+        </div>
+        <div id="drawing_tools">
           <small>Use drawing tools to highlight area to search restaurants.</small>
           <p>
             <input class="button-primary" id="start_drawing" type="button" value="Show Drawing Tools">
