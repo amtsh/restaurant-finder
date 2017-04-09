@@ -74,5 +74,6 @@ document.addEventListener('click',function(e) {
   }
   if(e.target && e.target.id== 'clear_filter') {
     cuisineFilterManager.enableFilter(false, null);
+    restaurantManager.showNearby()
   }
 });
